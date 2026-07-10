@@ -45,8 +45,6 @@ class InventorySeeder extends Seeder
 
             // 2. Crear los recursos asociados a esta categoría
             foreach ($products as $index => $productName) {
-                // Cantidad aleatoria entre 10 y 50 para empezar
-                $quantity = rand(10, 50); 
                 
                 Resource::create([
                     'category_id' => $category->id,

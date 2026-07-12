@@ -8,6 +8,18 @@ use Laravel\Socialite\Facades\Socialite;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Artisan;
+
+
+Route::get('/instalar-bd', function () {
+    try {
+        // Ejecutamos las migraciones forzadas (por estar en producción) y los seeders
+        Artisan::call('migrate:fresh', ['--force' => true, '--seed' => true]);
+        return '¡Éxito! Base de datos migrada y sembrada correctamente en TiDB.';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});
 
 // -----------------------------------------------------------------------
 // RUTAS PÚBLICAS Y DE AUTENTICACIÓN (No requieren inicio de sesión)

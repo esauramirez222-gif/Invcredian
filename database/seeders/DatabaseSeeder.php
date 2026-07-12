@@ -17,7 +17,6 @@ class DatabaseSeeder extends Seeder
     {
        // Llamamos al seeder de usuarios administradores
         $this->call([
-            UserSeeder::class,
             InventorySeeder::class,
         ]);
     }

@@ -12,6 +12,12 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Config;
 
+Route::get('/limpiar-memoria', function () {
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+    return 'Memoria borrada con éxito. Ya puedes probar los correos.';
+});
+
 Route::get('/test-correo', function () {
     try {
         // 1. Recolectar la configuración que Laravel realmente está leyendo en Vercel

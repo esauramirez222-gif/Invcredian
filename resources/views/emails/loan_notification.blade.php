@@ -17,10 +17,7 @@
     
     @elseif($type === 'rejected')
         <h3 style="color: #e53e3e;">Hola, {{ $loan->applicant_name }}.</h3>
-        <p>Lamentablemente tu solicitud de préstamo ha sido <strong>RECHAZADA</strong> por el siguiente motivo:</p>
-        <blockquote style="background: #f7fafc; padding: 10px; border-left: 4px solid #e53e3e;">
-            {{ $loan->reviewer_notes ?? 'No se especificó un motivo.' }}
-        </blockquote>
+        <p>Lamentablemente tu solicitud de préstamo ha sido <strong>RECHAZADA</strong></p>
         <p>Esta es la lista de lo que habías solicitado:</p>
 
     @elseif($type === 'returned')

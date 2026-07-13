@@ -66,7 +66,16 @@
                 <div class="w-px h-6 bg-gray-300/50"></div>
 
                 @auth
-                    <a href="{{ route('loans.index') }}" class="text-sm font-medium text-gray-500 hover:text-[#0F4E88] transition-colors">Ir al Panel</a>
+                    <!-- 1. Si es Administrador, mostramos el Panel -->
+                    @can('admin')
+                        <a href="{{ route('loans.index') }}" class="text-sm font-medium text-gray-500 hover:text-[#0F4E88] transition-colors">Ir al Panel</a>
+                    @endcan
+                    
+                    <!-- 2. Botón de Salir para CUALQUIER usuario logueado -->
+                    <form method="POST" action="{{ route('logout') }}" class="m-0 p-0 inline-flex items-center">
+                        @csrf
+                        <button type="submit" class="text-sm font-medium text-gray-500 hover:text-red-500 transition-colors">Salir</button>
+                    </form>
                 @else
                     <a href="{{ route('login') }}" class="text-sm font-medium text-gray-500 hover:text-[#0F4E88] transition-colors">Acceso</a>
                 @endauth

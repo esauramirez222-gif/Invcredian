@@ -7,6 +7,8 @@ use App\Models\Movement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\LoanNotification;
 
 class LoanController extends Controller
 {
@@ -61,6 +63,10 @@ class LoanController extends Controller
                 ]);
             });
 
+            // Enviar correo de aprobación al usuario
+            $loan->load('user', 'items.resource');
+            Mail::to($loan->user->email)->send(new LoanNotification($loan, 'approved'));
+
             return redirect()->route('loans.index')->with('success', 'Préstamo aprobado. El stock ha sido descontado.');
 
         } catch (\Exception $e) {
@@ -81,6 +87,10 @@ class LoanController extends Controller
             'reviewer_id' => Auth::id(),
             'reviewer_notes' => $request->reviewer_notes
         ]);
+
+        // Enviar correo de rechazo al usuario
+        $loan->load('user', 'items.resource');
+        Mail::to($loan->user->email)->send(new LoanNotification($loan, 'rejected'));
 
         return redirect()->route('loans.index')->with('success', 'La solicitud ha sido rechazada.');
     }
@@ -114,6 +124,10 @@ class LoanController extends Controller
                 // 3. Actualizar el estado de la solicitud
                 $loan->update(['status' => 'returned']);
             });
+
+            // Enviar correo de devolución al usuario
+            $loan->load('user', 'items.resource');
+            Mail::to($loan->user->email)->send(new LoanNotification($loan, 'returned'));
 
             return redirect()->route('loans.index')->with('success', 'Devolución registrada exitosamente. El inventario ha sido restablecido.');
 

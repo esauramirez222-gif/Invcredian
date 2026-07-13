@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Solicitud</title>
+    <title>Mi Solicitud e Historial</title>
     <link rel="icon" type="image/png" href="{{ asset('img/logo_credian.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -47,6 +47,10 @@
     <!-- Contenido Principal -->
     <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         
+        <!-- ========================================== -->
+        <!-- SECCIÓN 1: CARRITO DE SOLICITUD ACTUAL     -->
+        <!-- ========================================== -->
+
         <!-- Encabezado -->
         <div class="mb-10 text-center animate-fade-up">
             <h2 class="text-3xl lg:text-4xl font-extrabold tracking-tight text-gray-900 mb-3">
@@ -64,7 +68,7 @@
         @endif
 
         @if(count($list ?? []) > 0)
-            <div class="flex flex-col lg:flex-row gap-8 items-start">
+            <div class="flex flex-col lg:flex-row gap-8 items-start mb-16">
                 
                 <!-- Columna Izquierda: Lista de Equipos (Glassmorphism) -->
                 <div class="w-full lg:w-3/5 bg-white/50 backdrop-blur-xl border border-white/80 rounded-[2rem] p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-fade-up" style="animation-delay: 0.1s;">
@@ -148,7 +152,7 @@
             </div>
         @else
             <!-- Estado Vacío (Empty State) -->
-            <div class="max-w-2xl mx-auto text-center py-16 px-4 bg-white/50 backdrop-blur-xl border border-white/80 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-fade-up">
+            <div class="max-w-2xl mx-auto text-center py-16 px-4 bg-white/50 backdrop-blur-xl border border-white/80 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] animate-fade-up mb-16">
                 <!-- Logo en lugar del icono gris -->
                 <div class="flex justify-center mb-8">
                     <img src="{{ asset('img/logo_credian.png') }}" alt="Logo del Sistema" class="h-24 w-auto drop-shadow-sm opacity-75 hover:opacity-100 transition-opacity duration-300">
@@ -161,6 +165,75 @@
                 </a>
             </div>
         @endif
+
+        <!-- ========================================== -->
+        <!-- SECCIÓN 2: HISTORIAL DE PRÉSTAMOS DEL USUARIO -->
+        <!-- ========================================== -->
+        <div class="animate-fade-up" style="animation-delay: 0.3s;">
+            <div class="mb-8 text-center">
+                <h2 class="text-2xl font-extrabold tracking-tight text-gray-900">
+                    Historial de <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#0F4E88] to-[#33AD72]">Tus Solicitudes</span>
+                </h2>
+                <p class="text-gray-500 text-sm mt-2">Aquí puedes consultar el estado de los préstamos que has realizado anteriormente.</p>
+            </div>
+
+            <div class="bg-white/50 backdrop-blur-xl border border-white/80 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-white/40 border-b border-white/60">
+                                <th class="p-5 font-semibold text-gray-500 text-xs tracking-widest uppercase">Folio</th>
+                                <th class="p-5 font-semibold text-gray-500 text-xs tracking-widest uppercase">Fecha</th>
+                                <th class="p-5 font-semibold text-gray-500 text-xs tracking-widest uppercase">Equipos Solicitados</th>
+                                <th class="p-5 font-semibold text-gray-500 text-xs tracking-widest uppercase text-center">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/40">
+                            @forelse ($myLoans as $loan)
+                                <tr class="hover:bg-white/60 transition-colors duration-200">
+                                    <td class="p-5 text-sm font-mono text-gray-500 font-bold">#{{ str_pad($loan->id, 4, '0', STR_PAD_LEFT) }}</td>
+                                    <td class="p-5 text-sm text-gray-600">{{ $loan->created_at?->format('d/m/Y h:i A') ?? 'N/A' }}</td>
+                                    <td class="p-5">
+                                        <ul class="text-sm text-gray-700 space-y-1">
+                                            @foreach($loan->items as $item)
+                                                <li class="flex items-center gap-2">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-[#0F4E88]/50"></span>
+                                                    <span class="font-bold text-[#33AD72]">{{ $item->quantity }}x</span> 
+                                                    {{ $item->resource->name ?? 'Recurso eliminado' }}
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </td>
+                                    <td class="p-5 text-center">
+                                        @if($loan->status === 'pending')
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold text-yellow-700 bg-yellow-100 border border-yellow-200 uppercase tracking-wider shadow-sm">Pendiente</span>
+                                        @elseif($loan->status === 'approved')
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold text-[#33AD72] bg-[#33AD72]/10 border border-[#33AD72]/20 uppercase tracking-wider shadow-sm">Aprobado</span>
+                                        @elseif($loan->status === 'returned')
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold text-[#0F4E88] bg-[#0F4E88]/10 border border-[#0F4E88]/20 uppercase tracking-wider shadow-sm">Devuelto</span>
+                                        @else
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold text-red-600 bg-red-100 border border-red-200 uppercase tracking-wider shadow-sm">Rechazado</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="p-12 text-center">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <div class="w-12 h-12 bg-white/50 rounded-full flex items-center justify-center mb-3 border border-white">
+                                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            </div>
+                                            <p class="text-gray-500 font-medium">Aún no tienes historial de préstamos.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </main>
 </body>
 </html>

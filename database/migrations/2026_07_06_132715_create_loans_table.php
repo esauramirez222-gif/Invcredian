@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('loans', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('applicant_name'); // Nombre del solicitante
             $table->string('applicant_last_name'); // Apellido del solicitante
             $table->foreignId('reviewer_id')->nullable()->constrained('users')->nullOnDelete();

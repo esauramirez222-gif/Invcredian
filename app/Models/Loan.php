@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Loan extends Model
 {
     protected $fillable = [
+        'user_id',
         'applicant_name',
         'applicant_last_name',
         'reviewer_id',
@@ -14,6 +15,12 @@ class Loan extends Model
         'notes',
         'reviewer_notes'
     ];
+
+    // Relación con el usuario
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
     // Un préstamo pertenece a un revisor (Administrador)
     public function reviewer()

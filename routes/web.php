@@ -90,7 +90,7 @@ Route::middleware('auth')->group(function () {
     // =======================================================
     // ZONA VIP / ADMIN (Solo Jaziel y Leonardo)
     // =======================================================
-    Route::middleware(function ($request, $next) {
+    Route::middleware([function ($request, $next) {
         $admins = ['jaziel@credian.mx', 'leonardo@credian.mx'];
         
         // Si el correo NO está en la lista de VIPs, lo expulsamos al catálogo público
@@ -100,7 +100,7 @@ Route::middleware('auth')->group(function () {
         
         // Si es admin, lo dejamos pasar a las rutas de abajo
         return $next($request); 
-    })->group(function () {
+    }])->group(function () {
         
         // CRUD DE INVENTARIO (Gestión de recursos)
         Route::resource('inventario', ResourceController::class)->names('inventory')->parameters([

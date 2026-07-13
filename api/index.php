@@ -1,46 +1,44 @@
 <?php
 
-try {
-    // 1. Definir la ruta permitida por Vercel
-    $storagePath = '/tmp/storage';
+$tmpDir = '/tmp/laravel';
 
-    // 2. Crear carpetas temporales
-    $directories = [
-        $storagePath . '/app/public',
-        $storagePath . '/framework/cache/data',
-        $storagePath . '/framework/sessions',
-        $storagePath . '/framework/testing',
-        $storagePath . '/framework/views',
-        $storagePath . '/logs',
-        $storagePath . '/bootstrap/cache',
-    ];
+// 1. Crear la estructura completa de carpetas permitidas
+$dirs = [
+    $tmpDir . '/storage/framework/cache/data',
+    $tmpDir . '/storage/framework/sessions',
+    $tmpDir . '/storage/framework/testing',
+    $tmpDir . '/storage/framework/views',
+    $tmpDir . '/storage/logs',
+    $tmpDir . '/bootstrap/cache',
+];
 
-    foreach ($directories as $directory) {
-        if (!is_dir($directory)) {
-            mkdir($directory, 0755, true);
-        }
+foreach ($dirs as $dir) {
+    if (!is_dir($dir)) {
+        mkdir($dir, 0755, true);
     }
-
-    // 3. Cargar el motor
-    require __DIR__ . '/../vendor/autoload.php';
-    $app = require_once __DIR__ . '/../bootstrap/app.php';
-
-    // 4. Forzar el uso de /tmp
-    $app->useStoragePath($storagePath);
-
-    // 5. Ejecutar la app
-    $request = Illuminate\Http\Request::capture();
-    $response = $app->handle($request);
-    $response->send();
-    $app->terminate();
-
-} catch (\Throwable $e) {
-    // ¡LA TRAMPA! Si algo falla, forzamos a PHP a imprimir el error sin usar las Vistas de Laravel.
-    http_response_code(500);
-    echo "<div style='font-family: sans-serif; padding: 20px; background: #ffebee; border: 2px solid #f44336; border-radius: 8px;'>";
-    echo "<h2 style='color: #d32f2f;'>¡MÁSCARA QUITADA! ESTE ES EL ERROR REAL:</h2>";
-    echo "<p><b>Mensaje:</b> " . $e->getMessage() . "</p>";
-    echo "<p><b>Archivo:</b> " . $e->getFile() . " (Línea " . $e->getLine() . ")</p>";
-    echo "</div>";
-    echo "<pre style='background: #333; color: #fff; padding: 15px; margin-top: 15px; overflow-x: auto;'>" . $e->getTraceAsString() . "</pre>";
 }
+
+// 2. ¡LA MAGIA! Obligar a Laravel a usar /tmp para TODOS sus archivos críticos
+putenv('APP_SERVICES_CACHE=' . $tmpDir . '/bootstrap/cache/services.php');
+putenv('APP_PACKAGES_CACHE=' . $tmpDir . '/bootstrap/cache/packages.php');
+putenv('APP_CONFIG_CACHE=' . $tmpDir . '/bootstrap/cache/config.php');
+putenv('APP_ROUTES_CACHE=' . $tmpDir . '/bootstrap/cache/routes.php');
+putenv('APP_EVENTS_CACHE=' . $tmpDir . '/bootstrap/cache/events.php');
+putenv('VIEW_COMPILED_PATH=' . $tmpDir . '/storage/framework/views');
+
+$_ENV['APP_SERVICES_CACHE'] = $tmpDir . '/bootstrap/cache/services.php';
+$_ENV['APP_PACKAGES_CACHE'] = $tmpDir . '/bootstrap/cache/packages.php';
+$_ENV['APP_CONFIG_CACHE']   = $tmpDir . '/bootstrap/cache/config.php';
+$_ENV['APP_ROUTES_CACHE']   = $tmpDir . '/bootstrap/cache/routes.php';
+$_ENV['APP_EVENTS_CACHE']   = $tmpDir . '/bootstrap/cache/events.php';
+$_ENV['VIEW_COMPILED_PATH'] = $tmpDir . '/storage/framework/views';
+
+// 3. Cargar el motor principal
+require __DIR__ . '/../vendor/autoload.php';
+$app = require_once __DIR__ . '/../bootstrap/app.php';
+
+// 4. Mover la carpeta de almacenamiento final
+$app->useStoragePath($tmpDir . '/storage');
+
+// 5. Encender y ejecutar la aplicación (Sintaxis nativa de Laravel 11)
+$app->handleRequest(Illuminate\Http\Request::capture());

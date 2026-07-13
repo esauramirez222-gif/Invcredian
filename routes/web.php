@@ -71,9 +71,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/lista/agregar/{resource}', [PublicCatalogController::class, 'addToList'])->name('catalog.add');
     Route::post('/lista/quitar/{id}', [PublicCatalogController::class, 'removeFromList'])->name('catalog.remove');
     Route::get('/solicitud', [PublicCatalogController::class, 'viewList'])->name('catalog.list');
-    
-    // Nota: Cambié el método a 'checkout' y el nombre a 'catalog.submit' para coincidir con tu vista.
-    // (Asegúrate de que en tu PublicCatalogController la función se llame 'checkout').
     Route::post('/solicitud/enviar', [PublicCatalogController::class, 'submitRequest'])->name('catalog.submit');
 
 

@@ -9,6 +9,45 @@ use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Config;
+
+Route::get('/test-correo', function () {
+    try {
+        // 1. Recolectar la configuración que Laravel realmente está leyendo en Vercel
+        $config = [
+            'mailer' => config('mail.default'),
+            'host' => config('mail.mailers.smtp.host'),
+            'port' => config('mail.mailers.smtp.port'),
+            'username' => config('mail.mailers.smtp.username'),
+            // No imprimimos la contraseña por seguridad, solo vemos si existe
+            'tiene_password' => config('mail.mailers.smtp.password') ? 'Sí' : 'No', 
+            'encryption' => config('mail.mailers.smtp.encryption'),
+            'from' => config('mail.from.address'),
+        ];
+
+        // 2. Intentar enviar un correo de prueba puro
+        Mail::raw('Si puedes leer esto, tu configuración de Vercel y Google funciona perfectamente.', function ($message) {
+            // Se enviará al mismo correo remitente para probar
+            $message->to(config('mail.from.address')) 
+                    ->subject('Prueba de Diagnóstico Credian');
+        });
+
+        // 3. Si llega aquí, fue un éxito
+        return response()->json([
+            'status' => '¡Éxito! El correo salió de los servidores de Vercel.',
+            'configuracion_actual' => $config
+        ]);
+
+    } catch (\Exception $e) {
+        // 4. Si falla, atrapamos el error exacto y lo mostramos en pantalla
+        return response()->json([
+            'status' => 'Error al intentar enviar el correo',
+            'error_mensaje' => $e->getMessage(),
+            'configuracion_actual' => $config ?? 'No se pudo leer la configuración'
+        ], 500);
+    }
+});
 
 // -----------------------------------------------------------------------
 // RUTA DE INSTALACIÓN (Base de Datos)

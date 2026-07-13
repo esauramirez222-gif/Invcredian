@@ -91,15 +91,14 @@ class PublicCatalogController extends Controller
         }
 
         $user = Auth::user();
-
         $nameParts = explode(' ', $user->name, 2);
         $firstName = $nameParts[0];
         $lastName = $nameParts[1] ?? ''; 
 
-        DB::transaction(function () use ($request, $list, $firstName, $lastName, $user) {
+        // CORRECCIÓN: Asignamos el resultado de la transacción a la variable $loan
+        $loan = DB::transaction(function () use ($request, $list, $firstName, $lastName, $user) {
             
-            // 4. ¡AQUÍ GUARDAMOS EL user_id PARA ENLAZARLO CON SU CUENTA!
-            $loan = Loan::create([
+            $newLoan = Loan::create([
                 'user_id' => $user->id,
                 'applicant_name' => $firstName,
                 'applicant_last_name' => $lastName,
@@ -109,16 +108,20 @@ class PublicCatalogController extends Controller
 
             foreach ($list as $resourceId => $item) {
                 LoanItem::create([
-                    'loan_id' => $loan->id,
+                    'loan_id' => $newLoan->id,
                     'resource_id' => $resourceId,
                     'quantity' => $item['quantity']
                 ]);
             }
+
+            // Sacamos la variable de la burbuja
+            return $newLoan;
         });
 
+        // Limpiar el carrito de la sesión
         session()->forget('request_list');
 
-        // Cargar los detalles para el correo y enviarlo a los admins
+        // Ahora sí, $loan existe perfectamente y podemos enviarlo por correo
         $loan->load('items.resource');
         $admins = ['jaziel@credian.mx', 'leonardo@credian.mx'];
         Mail::to($admins)->send(new LoanNotification($loan, 'new_request'));

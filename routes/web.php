@@ -118,8 +118,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::resource('solicitudes', LoanController::class)->names('loans')->only(['index', 'show'])->parameters(['solicitudes' => 'loan']);
-
     // =======================================================
     // ZONA VIP (Exige el gafete 'admin' que creamos en el AppServiceProvider)
     // =======================================================
@@ -128,6 +126,10 @@ Route::middleware('auth')->group(function () {
         Route::resource('inventario', ResourceController::class)->names('inventory')->parameters([
             'inventario' => 'resource'
         ]);
+
+        // ¡AQUÍ MOVIMOS LA RUTA GENERAL DE SOLICITUDES! 
+        // Ahora solo los administradores pueden ver el listado y detalles de los préstamos
+        Route::resource('solicitudes', LoanController::class)->names('loans')->only(['index', 'show'])->parameters(['solicitudes' => 'loan']);
 
         Route::post('solicitudes/{loan}/aprobar', [LoanController::class, 'approve'])->name('loans.approve');
         Route::post('solicitudes/{loan}/rechazar', [LoanController::class, 'reject'])->name('loans.reject');
